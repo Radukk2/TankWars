@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 
-#include "lab_m1/TankWars/transform2D.h"
+#include "lab_m1/TankWars/hw-transform2D.h"
 #include "lab_m1/TankWars/hw-object2D.h"
 
 using namespace std;
@@ -25,11 +25,15 @@ TankWars::~TankWars()
 {
 }
 
+float sinusoidal_foo(float x)
+{
+    return 10 + 36 * sin(x / 115) + 7 * sin(x / 20) + 40 * sin(x / 250) + + 20 * sin(x / 40);
+}
 
 void TankWars::Init()
 {
     glm::ivec2 resolution = window->GetResolution();
-    glClearColor(0.0f, 0.5f, 1.0, 0);
+    glClearColor(0.0f, 0.8f, 1.0, 0);
     auto camera = GetSceneCamera();
     camera->SetOrthographic(0, (float)resolution.x, 0, (float)resolution.y, 0.01f, 400);
     camera->SetPosition(glm::vec3(0, 0, 50));
@@ -48,8 +52,24 @@ void TankWars::Init()
     scaleX = 1;
     scaleY = 1;
 
+    forfecareX = 0;
+    forfecareY = 0;
+
     // Initialize angularStep
     angularStep = 0;
+    step = 1;
+
+
+    for (float i = 0; i < resolution.x; i++) {
+        peaks.push_back(sinusoidal_foo(i));
+    }
+    
+    //modelMatrix *= transform2D::Translate(200,200);
+    //RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
+    Mesh* square1 = hw_object2D::CreateSquare("square1", corner, 1, glm::vec3(0.4, 0.4, 0.5), true);
+    AddMeshToList(square1);
+    Mesh* tank = hw_object2D::CreateTank("tank", glm::vec3(1, 1, 1), true);
+    AddMeshToList(tank);
    
 }
 
@@ -66,31 +86,34 @@ void TankWars::FrameStart()
 }
 
 
+
 void TankWars::Update(float deltaTimeSeconds)
 {
-    // TODO(student): Update steps for translation, rotation and scale,
-    // in order to create animations. Use the class variables in the
-    // class header, and if you need more of them to complete the task,
-    // add them over there!
-    // TODO(student): Create animations by multiplying the current
-    // transform matrix with the matrices you just implemented
-    // Remember, the last matrix in the chain will take effect first!
-    /*modelMatrix *= transform2D::Translate(translateX, translateY);
-    RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
+    for (int i = 0; i < peaks.size() - 1; i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(i * step, peaks[i] + 250);
+        modelMatrix *= transform2D::Forfecare(step, peaks[i + 1] - peaks[i]);
+        modelMatrix *= transform2D::Scale(step, 500);
+        modelMatrix *= transform2D::Translate(0, -1);
+        RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    }
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate((peaks.size() - 2) * step, peaks[(peaks.size() - 2)] + 250);
+    modelMatrix *= transform2D::Forfecare(step, peaks[(peaks.size() - 1)] - peaks[(peaks.size() - 2)]);
+    modelMatrix *= transform2D::Scale(step, 500);
+    modelMatrix *= transform2D::Translate(0, -1);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+
 
     modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(650, 250);
-    modelMatrix *= transform2D::Translate(50, 50);
-    modelMatrix *= transform2D::Scale(scaleX, scaleY);
-    modelMatrix *= transform2D::Translate(-50, -50);*/
-
+    modelMatrix *= transform2D::Translate(500, 500);
+    RenderMesh2D(meshes["tank"], shaders["VertexColor"], modelMatrix);
 
 
     // TODO(student): Create animations by multiplying the current
-    // transform matrix with the matrices you just implemented
+    // transform matrix with the matrices you just implemented.
     // Remember, the last matrix in the chain will take effect first!
 
-    RenderMesh2D(meshes["square3"], shaders["VertexColor"], modelMatrix);
 }
 
 

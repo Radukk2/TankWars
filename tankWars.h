@@ -1,6 +1,7 @@
 #pragma once
 
 #include "components/simple_scene.h"
+#include <vector>
 
 
 namespace m1
@@ -34,7 +35,10 @@ namespace m1
         float scaleX, scaleY;
         float angularStep;
         float go;
+        float forfecareX, forfecareY;
         bool left;
+        std::vector<float> peaks;
+        float step;
 
         // TODO(student): If you need any other class variables, define them here.
 

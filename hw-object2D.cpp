@@ -37,3 +37,39 @@ Mesh* hw_object2D::CreateSquare(
     square->InitFromData(vertices, indices);
     return square;
 }
+
+Mesh* hw_object2D::CreateTank(
+    const std::string& name,
+    glm::vec3 color,
+    bool fill)
+{
+    std::vector<VertexFormat> vertices =
+    {
+        VertexFormat(glm::vec3(-50, 10, 0), color),
+        VertexFormat(glm::vec3(-40, 20, 0), color),
+        VertexFormat(glm::vec3(40, 20, 0), color),
+        VertexFormat(glm::vec3(50, 10, 0), color),
+        VertexFormat(glm::vec3(40, 10, 0), color),
+        VertexFormat(glm::vec3(20, 0, 0), color),
+        VertexFormat(glm::vec3(-20, 0, 0), color),
+        VertexFormat(glm::vec3(-40, 10, 0), color),
+    };
+    Mesh* tank = new Mesh(name);
+
+    std::vector<unsigned int> indices = { 0, 3, 1, 
+                                          1, 3, 2, 
+                                          7, 6, 5,
+                                          7, 5, 4};
+
+    if (!fill) {
+        tank->SetDrawMode(GL_LINE_LOOP);
+    }
+    else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+
+    tank->InitFromData(vertices, indices);
+    return tank;
+}

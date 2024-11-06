@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "lab_m1/TankWars/transform2D.h"
-#include "lab_m1/TankWars/object2D.h"
+#include "lab_m1/TankWars/hw-object2D.h"
 
 using namespace std;
 using namespace m1;
@@ -42,7 +42,7 @@ void TankWars_Vis2D::Init()
     glm::vec3 corner = glm::vec3(0.001, 0.001, 0);
     length = 0.99f;
 
-    Mesh* square1 = object2D::CreateSquare("square1", corner, length, glm::vec3(1, 0, 0));
+    Mesh* square1 = hw_object2D::CreateSquare("square1", corner, length, glm::vec3(1, 0, 0));
     AddMeshToList(square1);
 }
 
