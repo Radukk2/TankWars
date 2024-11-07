@@ -20,7 +20,8 @@ namespace transform2D
     inline glm::mat3 Scale(float scaleX, float scaleY)
     {
         // TODO(student): Implement the scaling matrix
-        return glm::transpose(glm::mat3(scaleX, 0, 0,
+        return glm::transpose(
+            glm::mat3(scaleX, 0, 0,
             0, scaleY, 0,
             0, 0, 1));
 
@@ -30,7 +31,8 @@ namespace transform2D
     inline glm::mat3 Rotate(float radians)
     {
         // TODO(student): Implement the rotation matrix
-        return glm::transpose(glm::mat3(cos(radians), -sin(radians), 0,
+        return glm::transpose(glm::mat3(
+            cos(radians), -sin(radians), 0,
             sin(radians), cos(radians), 0,
             0, 0, 1));
 
@@ -38,7 +40,8 @@ namespace transform2D
 
     inline glm::mat3 Forfecare(float forfecareX, float forfecareY)
     {
-        return glm::transpose(glm::mat3(1, 0, 0,
+        return glm::transpose(glm::mat3(
+            1, 0, 0,
             forfecareY / forfecareX, 1, 0,
             0, 0, 1));
     }

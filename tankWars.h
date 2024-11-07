@@ -17,8 +17,10 @@ namespace m1
     private:
         void FrameStart() override;
         void Update(float deltaTimeSeconds) override;
-        void FrameEnd() override;
 
+        void FrameEnd() override;
+        void CreateField();
+        void PlaceTanks();
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -39,6 +41,13 @@ namespace m1
         bool left;
         std::vector<float> peaks;
         float step;
+        float tank_x;
+        float tank_y;
+        float enemy_x;
+        float enemy_y;
+        float elevation;
+        float tank_angle, enemy_angle, t_angle, t_enemy_angle;
+        float t_position, t_enemy_position;
 
         // TODO(student): If you need any other class variables, define them here.
 

@@ -48,6 +48,8 @@ void TankWars::Init()
     translateX = 0;
     translateY = 0;
 
+    elevation = 250;
+
     // Initialize sx and sy (the scale factors)
     scaleX = 1;
     scaleY = 1;
@@ -63,13 +65,45 @@ void TankWars::Init()
     for (float i = 0; i < resolution.x; i++) {
         peaks.push_back(sinusoidal_foo(i));
     }
+    float start_x = 100;
+    float start_x_next = 101;
+    tank_x = start_x;
+    tank_y = peaks[start_x] + (tank_x - start_x) * (peaks[start_x_next] - peaks[start_x]);
+    //cout << tank_x << " " << tank_y;
+    float V_x = start_x_next - start_x;
+    float V_y = peaks[start_x_next] - peaks[start_x];
+
+    tank_angle = atan2(V_y, V_x);
+
+    start_x = 1000;
+    start_x_next = 1001;
+
+    enemy_x = start_x;
+    enemy_y = peaks[start_x] + (enemy_x - start_x) * (peaks[start_x_next] - peaks[start_x]);
+
+    V_x = start_x_next - start_x;
+    V_y = peaks[start_x_next] - peaks[start_x];
+
+    enemy_angle = atan2(V_y, V_x);
+
+    t_angle = 0;
+
+    t_enemy_angle = 0;
+
+    t_position = 0;
+
+    t_enemy_position = 0;
     
     //modelMatrix *= transform2D::Translate(200,200);
     //RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
     Mesh* square1 = hw_object2D::CreateSquare("square1", corner, 1, glm::vec3(0.4, 0.4, 0.5), true);
     AddMeshToList(square1);
-    Mesh* tank = hw_object2D::CreateTank("tank", glm::vec3(1, 1, 1), true);
+    Mesh* tank = hw_object2D::CreateTank("tank", glm::vec3(0.5, 1, 0.1), true);
     AddMeshToList(tank);
+    Mesh* enemy = hw_object2D::CreateTank("enemy", glm::vec3(1, 0, 0.1), true);
+    AddMeshToList(enemy);
+    Mesh* myTurret = hw_object2D::CreateTurret("turret", glm::vec3(0, 0, 0), true);
+    AddMeshToList(myTurret);
    
 }
 
@@ -85,30 +119,78 @@ void TankWars::FrameStart()
     glViewport(0, 0, resolution.x, resolution.y);
 }
 
-
-
-void TankWars::Update(float deltaTimeSeconds)
-{
+void TankWars::CreateField() {
     for (int i = 0; i < peaks.size() - 1; i++) {
         modelMatrix = glm::mat3(1);
-        modelMatrix *= transform2D::Translate(i * step, peaks[i] + 250);
+        modelMatrix *= transform2D::Translate(i * step, peaks[i] + elevation);
         modelMatrix *= transform2D::Forfecare(step, peaks[i + 1] - peaks[i]);
         modelMatrix *= transform2D::Scale(step, 500);
         modelMatrix *= transform2D::Translate(0, -1);
         RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
     }
     modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate((peaks.size() - 2) * step, peaks[(peaks.size() - 2)] + 250);
+    modelMatrix *= transform2D::Translate((peaks.size() - 2) * step, peaks[(peaks.size() - 2)] + elevation);
     modelMatrix *= transform2D::Forfecare(step, peaks[(peaks.size() - 1)] - peaks[(peaks.size() - 2)]);
     modelMatrix *= transform2D::Scale(step, 500);
     modelMatrix *= transform2D::Translate(0, -1);
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+}
+
+void TankWars::PlaceTanks() {
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation);
+    modelMatrix *= transform2D::Rotate(tank_angle);
+    RenderMesh2D(meshes["tank"], shaders["VertexColor"], modelMatrix);
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation);
+    modelMatrix *= transform2D::Rotate(tank_angle + t_angle);
+    RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
 
 
     modelMatrix = glm::mat3(1);
-    modelMatrix *= transform2D::Translate(500, 500);
+    modelMatrix *= transform2D::Translate(enemy_x, enemy_y + elevation);
+    modelMatrix *= transform2D::Rotate(enemy_angle + t_enemy_angle);
+    RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
+    RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
+}
+
+void TankWars::Update(float deltaTimeSeconds)
+{
+
+    CreateField();
+    PlaceTanks();
+    /*for (int i = 0; i < peaks.size() - 1; i++) {
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(i * step, peaks[i] + elevation);
+        modelMatrix *= transform2D::Forfecare(step, peaks[i + 1] - peaks[i]);
+        modelMatrix *= transform2D::Scale(step, 500);
+        modelMatrix *= transform2D::Translate(0, -1);
+        RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+    }
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate((peaks.size() - 2) * step, peaks[(peaks.size() - 2)] + elevation);
+    modelMatrix *= transform2D::Forfecare(step, peaks[(peaks.size() - 1)] - peaks[(peaks.size() - 2)]);
+    modelMatrix *= transform2D::Scale(step, 500);
+    modelMatrix *= transform2D::Translate(0, -1);
+    RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);*/
+
+
+    /*modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation);
+    modelMatrix *= transform2D::Rotate(tank_angle);
     RenderMesh2D(meshes["tank"], shaders["VertexColor"], modelMatrix);
 
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(tank_x + 15, tank_y + elevation + 20);
+    modelMatrix *= transform2D::Rotate(tank_angle);
+    RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
+
+
+    modelMatrix = glm::mat3(1);
+    modelMatrix *= transform2D::Translate(enemy_x, enemy_y + elevation);
+    modelMatrix *= transform2D::Rotate(enemy_angle);
+    RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);*/
 
     // TODO(student): Create animations by multiplying the current
     // transform matrix with the matrices you just implemented.
@@ -130,6 +212,65 @@ void TankWars::FrameEnd()
 
 void TankWars::OnInputUpdate(float deltaTime, int mods)
 {
+    //tank movement
+    float tank_speed = 50;
+    float turret_speed = 100;
+    if (window->KeyHold(GLFW_KEY_A)) {
+        if (tank_x > 40) {
+            tank_x -= deltaTime * tank_speed;
+            tank_y = peaks[tank_x] + (tank_x - tank_x) * (peaks[tank_x + 1] - peaks[tank_x]);
+            float V_x = 1;
+            float V_y = peaks[tank_x + 1] - peaks[tank_x];
+            tank_angle = atan2(V_y, V_x);
+        }
+    }
+    if (window->KeyHold(GLFW_KEY_D)) {
+        if (tank_x < 1240) {
+            tank_x += deltaTime * tank_speed;
+            tank_y = peaks[tank_x] + (tank_x - tank_x) * (peaks[tank_x + 1] - peaks[tank_x]);
+            float V_x = 1;
+            float V_y = peaks[tank_x + 1] - peaks[tank_x];
+            tank_angle = atan2(V_y, V_x);
+        }
+    }
+    if (window->KeyHold(GLFW_KEY_LEFT)) {
+        if (enemy_x > 40) {
+            enemy_x -= deltaTime * tank_speed;
+            enemy_y = peaks[enemy_x] + (enemy_x - enemy_x) * (peaks[enemy_x + 1] - peaks[enemy_x]);
+            float V_x = 1;
+            float V_y = peaks[enemy_x + 1] - peaks[enemy_x];
+            enemy_angle = atan2(V_y, V_x);
+        }
+    }
+    if (window->KeyHold(GLFW_KEY_RIGHT)) {
+        if (enemy_x < 1240) {
+            enemy_x += deltaTime * tank_speed;
+            enemy_y = peaks[enemy_x] + (enemy_x - enemy_x) * (peaks[enemy_x + 1] - peaks[enemy_x]);
+            float V_x = 1;
+            float V_y = peaks[enemy_x + 1] - peaks[enemy_x];
+            enemy_angle = atan2(V_y, V_x);
+        }
+    }
+
+    //turret movement/
+    if (window->KeyHold(GLFW_KEY_W)) {
+
+    }
+
+
+    if (window->KeyHold(GLFW_KEY_S)) {
+
+    }
+
+    if (window->KeyHold(GLFW_KEY_UP)) {
+
+    }
+
+    if (window->KeyHold(GLFW_KEY_DOWN)) {
+
+    }
+
+
 }
 
 
