@@ -62,10 +62,10 @@ Mesh* hw_object2D::CreateTank(
     }
     Mesh* tank = new Mesh(name);
 
-    std::vector<unsigned int> indices = { 0, 3, 1, 
-                                          1, 3, 2, 
+    std::vector<unsigned int> indices = { 0, 3, 1,
+                                          1, 3, 2,
                                           7, 6, 5,
-                                          7, 5, 4};
+                                          7, 5, 4 };
     for (int i = 0; i < 200; i++) {
         indices.push_back(i + 8);
         indices.push_back(8);
@@ -97,13 +97,15 @@ Mesh* hw_object2D::CreateTurret(
         VertexFormat(glm::vec3(30, 3, 0), color), //1
         VertexFormat(glm::vec3(30, -3, 0), color),  //2
         VertexFormat(glm::vec3(0, -3, 0), color),  //3
+
     };
     Mesh* turret = new Mesh(name);
     std::vector<unsigned int> indices = { 0, 2, 1,
-                                          0, 3, 2,};
+                                          0, 3, 2, };
     if (!fill) {
         turret->SetDrawMode(GL_LINE_LOOP);
-    } else {
+    }
+    else {
         // Draw 2 triangles. Add the remaining 2 indices
         indices.push_back(0);
         indices.push_back(2);
@@ -111,4 +113,75 @@ Mesh* hw_object2D::CreateTurret(
     turret->InitFromData(vertices, indices);
     return turret;
 }
+
+Mesh* hw_object2D::CreateLifeBar(
+    const std::string& name,
+    glm::vec3 color,
+    bool fill)
+{
+    std::vector<VertexFormat> vertices =
+    {
+        VertexFormat(glm::vec3(-27, 4, 0), color), //0
+        VertexFormat(glm::vec3(27, 4, 0), color), //1
+        VertexFormat(glm::vec3(27, -4, 0), color),  //2
+        VertexFormat(glm::vec3(-27, -4, 0), color),  //3
+        VertexFormat(glm::vec3(-25, 2, 0), color),  //4
+        VertexFormat(glm::vec3(25, 2, 0), color),   //5
+        VertexFormat(glm::vec3(25, -2, 0), color),  //6
+        VertexFormat(glm::vec3(-25, -2, 0), color), //7
+    };
+    Mesh* lifeBar = new Mesh(name);
+    std::vector<unsigned int> indices = {
+                                        0,4,1,
+                                        4,5,1,
+                                        1,5,6,
+                                        1,6,2,
+                                        7,2,6,
+                                        7,3,2,
+                                        0,3,4,
+                                        4,7,3 };
+
+    if (!fill) {
+        lifeBar->SetDrawMode(GL_LINE_LOOP);
+    }
+    else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+    lifeBar->InitFromData(vertices, indices);
+    return lifeBar;
+
+
+}
+
+Mesh* hw_object2D::CreateLife(
+    const std::string& name,
+    glm::vec3 color,
+    bool fill)
+{
+    std::vector<VertexFormat> vertices =
+    {
+        VertexFormat(glm::vec3(-0, 2, 0), color),  //0
+        VertexFormat(glm::vec3(50, 2, 0), color),   //1
+        VertexFormat(glm::vec3(50, -2, 0), color),  //2
+        VertexFormat(glm::vec3(0, -2, 0), color), //3
+    };
+    Mesh* life = new Mesh(name);
+    std::vector<unsigned int> indices = {
+                                        0,3,2,
+                                        0,2,1};
+
+    if (!fill) {
+        life->SetDrawMode(GL_LINE_LOOP);
+    }
+    else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+    life->InitFromData(vertices, indices);
+    return life;
+}
+
 

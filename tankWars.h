@@ -21,6 +21,8 @@ namespace m1
         void FrameEnd() override;
         void CreateField();
         void PlaceTanks();
+        void EnemyHit();
+        void HeroHit();
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -50,6 +52,7 @@ namespace m1
         float t_position_x, t_position_y;
         float t_enemy_position_x, t_enemy_position_y;
         bool p1_alive, p2_alive;
+        int num_hits_1, num_hits_2;
         // TODO(student): If you need any other class variables, define them here.
 
     };

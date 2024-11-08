@@ -63,6 +63,9 @@ void TankWars::Init()
 
     p1_alive = true;
 
+    num_hits_1 = 0;
+    num_hits_2 = 0;
+
 
     for (float i = 0; i < resolution.x; i++) {
         peaks.push_back(sinusoidal_foo(i));
@@ -92,11 +95,11 @@ void TankWars::Init()
 
     t_enemy_angle = 0;
 
-    t_position_x = 0;
+    /*t_position_x = 0;
     t_position_y = 0;
 
     t_enemy_position_x = 0;
-    t_enemy_position_y = 0;
+    t_enemy_position_y = 0;*/
     //modelMatrix *= transform2D::Translate(200,200);
     //RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
     Mesh* square1 = hw_object2D::CreateSquare("square1", corner, 1, glm::vec3(0.4, 0.4, 0.5), true);
@@ -107,6 +110,10 @@ void TankWars::Init()
     AddMeshToList(enemy);
     Mesh* myTurret = hw_object2D::CreateTurret("turret", glm::vec3(0, 0, 0), true);
     AddMeshToList(myTurret);
+    Mesh* lifeBar = hw_object2D::CreateLifeBar("lifeBar", glm::vec3(1, 1, 1), true);
+    AddMeshToList(lifeBar);
+    Mesh* life = hw_object2D::CreateLife("life", glm::vec3(1, 0, 0.1), true);
+    AddMeshToList(life);
    
 }
 
@@ -140,31 +147,55 @@ void TankWars::CreateField() {
 }
 
 void TankWars::PlaceTanks() {
+    //place my_tank
     if (p1_alive) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation);
         modelMatrix *= transform2D::Rotate(tank_angle);
         RenderMesh2D(meshes["tank"], shaders["VertexColor"], modelMatrix);
-
-        modelMatrix = glm::mat3(1);
-        //modelMatrix *= transform2D::Translate(t_position_x, t_position_y + 25);
-        modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation + 25);
+        modelMatrix *= transform2D::Translate(0, 25);
         modelMatrix *= transform2D::Rotate(t_angle);
-        modelMatrix *= transform2D::Rotate(tank_angle);
         RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
+        //lifeBar and life
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(tank_x, tank_y +  elevation + 50);
+        RenderMesh2D(meshes["lifeBar"], shaders["VertexColor"], modelMatrix);
+        modelMatrix *= transform2D::Translate(-25, 0);
+        modelMatrix *= transform2D::Scale(1 - 0.1  * num_hits_1, 1);
+        RenderMesh2D(meshes["life"], shaders["VertexColor"], modelMatrix);
+        
     }
+    //place enemy tank
     if (p2_alive) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(enemy_x, enemy_y + elevation);
         modelMatrix *= transform2D::Rotate(enemy_angle);
         RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
-
-        modelMatrix = glm::mat3(1);
-        //modelMatrix *= transform2D::Translate(t_enemy_position_x, t_enemy_position_y + 25);
-        modelMatrix *= transform2D::Translate(enemy_x, enemy_y + elevation + 25);
-        modelMatrix *= transform2D::Rotate(enemy_angle + t_enemy_angle + M_PI);
+        modelMatrix *= transform2D::Translate(0,25);
+        modelMatrix *= transform2D::Rotate(t_enemy_angle + M_PI);
         RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
+        //lifeBar and life
+        modelMatrix = glm::mat3(1);
+        modelMatrix *= transform2D::Translate(enemy_x, enemy_y + elevation + 50);
+        RenderMesh2D(meshes["lifeBar"], shaders["VertexColor"], modelMatrix);
+        modelMatrix *= transform2D::Translate(-25, 0);
+        modelMatrix *= transform2D::Scale(1 - 0.1 * num_hits_2, 1);
+        RenderMesh2D(meshes["life"], shaders["VertexColor"], modelMatrix);
     }
+}
+
+void TankWars::EnemyHit() 
+{
+    num_hits_2++;
+    if (num_hits_2 == 10)
+        p2_alive = false;
+}
+
+void TankWars::HeroHit()
+{
+    num_hits_1++;
+    if (num_hits_1 == 10)
+        p1_alive = false;
 }
 
 void TankWars::Update(float deltaTimeSeconds)
@@ -290,17 +321,17 @@ void TankWars::OnKeyPress(int key, int mods)
 {
 
     if (key == GLFW_KEY_SPACE) {
-
     }
 
     if (key == GLFW_KEY_ENTER) {
-
     }
-    if (key == GLFW_KEY_F1)
-        p1_alive = false;
+    if (key == GLFW_KEY_F1) {
+        HeroHit();
+    }
 
-    if (key == GLFW_KEY_F2)
-        p2_alive = false;
+    if (key == GLFW_KEY_F2) {
+        EnemyHit();
+    }
     // Add key press event
 }
 
