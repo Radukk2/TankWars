@@ -47,8 +47,9 @@ namespace m1
         float enemy_y;
         float elevation;
         float tank_angle, enemy_angle, t_angle, t_enemy_angle;
-        float t_position, t_enemy_position;
-
+        float t_position_x, t_position_y;
+        float t_enemy_position_x, t_enemy_position_y;
+        bool p1_alive, p2_alive;
         // TODO(student): If you need any other class variables, define them here.
 
     };

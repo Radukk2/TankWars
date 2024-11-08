@@ -93,10 +93,10 @@ Mesh* hw_object2D::CreateTurret(
 {
     std::vector<VertexFormat> vertices =
     {
-        VertexFormat(glm::vec3(15, 24, 0), color), //0
-        VertexFormat(glm::vec3(35, 24, 0), color), //1
-        VertexFormat(glm::vec3(35, 20, 0), color),  //2
-        VertexFormat(glm::vec3(15, 20, 0), color),  //3
+        VertexFormat(glm::vec3(0, 3, 0), color), //0
+        VertexFormat(glm::vec3(30, 3, 0), color), //1
+        VertexFormat(glm::vec3(30, -3, 0), color),  //2
+        VertexFormat(glm::vec3(0, -3, 0), color),  //3
     };
     Mesh* turret = new Mesh(name);
     std::vector<unsigned int> indices = { 0, 2, 1,
