@@ -9,6 +9,11 @@
 using namespace std;
 using namespace m1;
 
+#define turret_length 30
+#define magnitude 70
+#define g 9.8
+
+
 
 /*
  *  To find out more about `FrameStart`, `Update`, `FrameEnd`
@@ -57,6 +62,8 @@ void TankWars::Init()
     forfecareX = 0;
     forfecareY = 0;
 
+    projectiles = 0;
+
     // Initialize angularStep
     angularStep = 0;
     step = 1;
@@ -65,6 +72,9 @@ void TankWars::Init()
 
     num_hits_1 = 0;
     num_hits_2 = 0;
+
+    launch_p1 = false;
+    launch_p2 = false;
 
 
     for (float i = 0; i < resolution.x; i++) {
@@ -98,8 +108,14 @@ void TankWars::Init()
     /*t_position_x = 0;
     t_position_y = 0;
 
+
+
     t_enemy_position_x = 0;
     t_enemy_position_y = 0;*/
+    projectileSpeed.x = cos(t_angle) * magnitude;
+    projectileSpeed.y = sin(t_angle) * magnitude;
+
+    projectileCoordinates = glm::vec2(0, 0);
     //modelMatrix *= transform2D::Translate(200,200);
     //RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
     Mesh* square1 = hw_object2D::CreateSquare("square1", corner, 1, glm::vec3(0.4, 0.4, 0.5), true);
@@ -114,6 +130,8 @@ void TankWars::Init()
     AddMeshToList(lifeBar);
     Mesh* life = hw_object2D::CreateLife("life", glm::vec3(1, 0, 0.1), true);
     AddMeshToList(life);
+    Mesh* projectile = hw_object2D::CreateProjectile("projectile", glm::vec3(0, 0, 0), true);
+    AddMeshToList(projectile);
    
 }
 
@@ -146,7 +164,7 @@ void TankWars::CreateField() {
     RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
 }
 
-void TankWars::PlaceTanks() {
+void TankWars::PlaceTanks(float deltaTime) {
     //place my_tank
     if (p1_alive) {
         modelMatrix = glm::mat3(1);
@@ -156,6 +174,14 @@ void TankWars::PlaceTanks() {
         modelMatrix *= transform2D::Translate(0, 25);
         modelMatrix *= transform2D::Rotate(t_angle);
         RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
+        if (launch_p1) {
+            float speed = 2;
+            projectileCoordinates += projectileSpeed * deltaTime * speed;
+            projectileSpeed -= g * deltaTime * speed;
+            modelMatrix *= transform2D::Translate(turret_length + projectileCoordinates.x, projectileCoordinates.y);
+            RenderMesh2D(meshes["projectile"], shaders["VertexColor"], modelMatrix);
+            
+        }
         //lifeBar and life
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(tank_x, tank_y +  elevation + 50);
@@ -182,6 +208,7 @@ void TankWars::PlaceTanks() {
         modelMatrix *= transform2D::Scale(1 - 0.1 * num_hits_2, 1);
         RenderMesh2D(meshes["life"], shaders["VertexColor"], modelMatrix);
     }
+
 }
 
 void TankWars::EnemyHit() 
@@ -198,11 +225,27 @@ void TankWars::HeroHit()
         p1_alive = false;
 }
 
+void TankWars::Hit() {
+    float dx = projectileCoordinates.x + tank_x - enemy_x;
+    float dy = projectileCoordinates.y + tank_y - enemy_y;
+    float distance = sqrt(dx * dx + dy * dy);
+    if (distance < 40) {
+        EnemyHit();
+        projectileSpeed.x = cos(t_angle) * magnitude;
+        projectileSpeed.y = sin(t_angle) * magnitude;
+        projectileCoordinates = glm::vec2(0, 0);
+        launch_p1 = false;
+
+    }
+}
+
 void TankWars::Update(float deltaTimeSeconds)
 {
 
     CreateField();
-    PlaceTanks();
+    PlaceTanks(deltaTimeSeconds);
+    Hit();
+    
     /*for (int i = 0; i < peaks.size() - 1; i++) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(i * step, peaks[i] + elevation);
@@ -321,9 +364,11 @@ void TankWars::OnKeyPress(int key, int mods)
 {
 
     if (key == GLFW_KEY_SPACE) {
+        launch_p1 = true;
     }
 
     if (key == GLFW_KEY_ENTER) {
+        launch_p2 = true;
     }
     if (key == GLFW_KEY_F1) {
         HeroHit();
@@ -339,6 +384,9 @@ void TankWars::OnKeyPress(int key, int mods)
 void TankWars::OnKeyRelease(int key, int mods)
 {
     // Add key release event
+    if (key == GLFW_KEY_ENTER) {
+        launch_p2 = false;
+    }
 }
 
 

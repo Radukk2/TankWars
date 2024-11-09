@@ -15,4 +15,5 @@ namespace hw_object2D
     Mesh* CreateTurret(const std::string& name,glm::vec3 color, bool fill);
     Mesh* CreateLifeBar(const std::string& name, glm::vec3 color, bool fill);
     Mesh* CreateLife(const std::string& name, glm::vec3 color, bool fill);
+    Mesh* CreateProjectile(const std::string& name, glm::vec3 color, bool fill);
 }

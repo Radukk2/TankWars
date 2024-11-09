@@ -20,9 +20,10 @@ namespace m1
 
         void FrameEnd() override;
         void CreateField();
-        void PlaceTanks();
+        void PlaceTanks(float deltaTime);
         void EnemyHit();
         void HeroHit();
+        void Hit();
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -51,8 +52,10 @@ namespace m1
         float tank_angle, enemy_angle, t_angle, t_enemy_angle;
         float t_position_x, t_position_y;
         float t_enemy_position_x, t_enemy_position_y;
-        bool p1_alive, p2_alive;
+        bool p1_alive, p2_alive, launch_p1, launch_p2;
         int num_hits_1, num_hits_2;
+        glm::vec2 projectileSpeed, projectileCoordinates;
+        int projectiles, inAir;
         // TODO(student): If you need any other class variables, define them here.
 
     };
