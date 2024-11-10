@@ -12,6 +12,7 @@ using namespace m1;
 #define turret_length 30
 #define magnitude 70
 #define g 9.8
+#define impact 15
 
 
 
@@ -178,8 +179,9 @@ void TankWars::PlaceTanks(float deltaTime) {
         modelMatrix *= transform2D::Translate(25, 0);
         coordinates = modelMatrix;
     }
-        //if (launch_p1) {
+    /*cout << projectileCoordinates;*/
             for (size_t i = 0; i < projectileCoordinates.size(); ++i) {
+                //cout << projectileCoordinates[i] << " ";
                 projectileCoordinates[i] += projectileSpeed[i] * deltaTime * speed;
                 projectileSpeed[i].y -= g * deltaTime * speed;
                 modelMatrix = glm::mat3(1);
@@ -195,7 +197,7 @@ void TankWars::PlaceTanks(float deltaTime) {
         //}
 
         //lifeBar and life
-        if (p1_alive) {
+    if (p1_alive) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(tank_x, tank_y +  elevation + 50);
         RenderMesh2D(meshes["lifeBar"], shaders["VertexColor"], modelMatrix);
@@ -244,7 +246,6 @@ void TankWars::PlaceTanks(float deltaTime) {
         modelMatrix *= transform2D::Scale(1 - 0.1 * num_hits_2, 1);
         RenderMesh2D(meshes["life"], shaders["VertexColor"], modelMatrix);
     }
-
 }
 
 void TankWars::EnemyHit() 
@@ -313,12 +314,36 @@ void TankWars::Hit() {
     }
 }
 
+void TankWars::HitFloor()
+{
+    for (int j = 0; j < projectileCoordinates.size(); j++) {
+        float proj_x = projectileCoordinates[j].x;
+        float proj_y = projectileCoordinates[j].y;
+        if (proj_x >= 0 && proj_x < peaks.size() - 1) {
+            int x1 = static_cast<int>(proj_x);
+            float t = (proj_x - x1);
+            float height = peaks[x1] * (1 - t) + peaks[x1 + 1] * t;
+            if (height + elevation >= proj_y) {
+                int y1 = static_cast<int>(proj_y);
+                for (int i = -15; i < 15; i++) {
+                    //deform 
+                }
+                projectileCoordinates.erase(projectileCoordinates.begin() + j);
+                projectileSpeed.erase(projectileSpeed.begin() + j);
+                --j;
+            }
+        }
+    }
+}
+
+
 void TankWars::Update(float deltaTimeSeconds)
 {
 
     CreateField();
     PlaceTanks(deltaTimeSeconds);
     Hit();
+    HitFloor();
 
     
     /*for (int i = 0; i < peaks.size() - 1; i++) {
@@ -449,13 +474,6 @@ void TankWars::OnKeyPress(int key, int mods)
         e_projectileSpeed.push_back(glm::vec2(cos(enemy_angle + t_enemy_angle) * magnitude, sin(enemy_angle + t_enemy_angle) * magnitude));
         launch_p2 = true;
     }
-    if (key == GLFW_KEY_F1) {
-        HeroHit();
-    }
-
-    if (key == GLFW_KEY_F2) {
-        EnemyHit();
-    }
     // Add key press event
 }
 
@@ -464,9 +482,6 @@ void TankWars::OnKeyRelease(int key, int mods)
 {
 
     // Add key release event
-    if (key == GLFW_KEY_ENTER) {
-        launch_p2 = false;
-    }
 }
 
 
