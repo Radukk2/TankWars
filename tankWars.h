@@ -25,6 +25,7 @@ namespace m1
         void HeroHit();
         void Hit();
         void HitFloor();
+        void LandSlide(float deltaTimeSeconds);
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;

@@ -12,7 +12,7 @@ using namespace m1;
 #define turret_length 30
 #define magnitude 70
 #define g 9.8
-#define impact 15
+#define impact 50
 
 
 
@@ -166,7 +166,7 @@ void TankWars::CreateField() {
 }
 
 void TankWars::PlaceTanks(float deltaTime) {
-    float speed = 2;
+    float speed = 6;
     //place my_tank
     if (p1_alive) {
         modelMatrix = glm::mat3(1);
@@ -325,15 +325,19 @@ void TankWars::HitFloor()
             float height = peaks[x1] * (1 - t) + peaks[x1 + 1] * t;
             if (height + elevation >= proj_y) {
                 int y1 = static_cast<int>(proj_y);
-                for (int i = -15; i < 15; i++) {
-                    //deform 
-                }
+                for (int i = -impact; i < impact; i++)
+                    peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
                 projectileCoordinates.erase(projectileCoordinates.begin() + j);
                 projectileSpeed.erase(projectileSpeed.begin() + j);
                 --j;
             }
         }
     }
+}
+
+void TankWars::LandSlide(float deltaTimeSeconds)
+{
+
 }
 
 
@@ -344,6 +348,7 @@ void TankWars::Update(float deltaTimeSeconds)
     PlaceTanks(deltaTimeSeconds);
     Hit();
     HitFloor();
+    LandSlide(deltaTimeSeconds);
 
     
     /*for (int i = 0; i < peaks.size() - 1; i++) {
