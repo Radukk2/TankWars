@@ -25,6 +25,8 @@ namespace m1
         void HeroHit();
         void Hit();
         void HitFloor();
+        void HeroHitFloor();
+        void VillainHitFloor();
         void LandSlide(float deltaTimeSeconds);
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
@@ -59,6 +61,7 @@ namespace m1
         std::vector<glm::vec2> projectileSpeed, projectileCoordinates;
         std::vector<glm::vec2> e_projectileSpeed, e_projectileCoordinates;
         int projectiles, inAir;
+        bool trajectory_1, trajectory_2;
         // TODO(student): If you need any other class variables, define them here.
 
     };

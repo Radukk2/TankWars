@@ -13,6 +13,7 @@ using namespace m1;
 #define magnitude 70
 #define g 9.8
 #define impact 50
+#define threshold 20
 
 
 
@@ -106,19 +107,10 @@ void TankWars::Init()
 
     t_enemy_angle = M_PI;
 
-    /*t_position_x = 0;
-    t_position_y = 0;
+    trajectory_1 = true;
 
+    trajectory_2 = true;
 
-
-    t_enemy_position_x = 0;
-    t_enemy_position_y = 0;*/
-    /*projectileSpeed.x = cos(t_angle) * magnitude;
-    projectileSpeed.y = sin(t_angle) * magnitude;*/
-
-    /*projectileCoordinates = glm::vec2(0, 0);*/
-    //modelMatrix *= transform2D::Translate(200,200);
-    //RenderMesh2D(meshes["square2"], shaders["VertexColor"], modelMatrix);
     Mesh* square1 = hw_object2D::CreateSquare("square1", corner, 1, glm::vec3(0.4, 0.4, 0.5), true);
     AddMeshToList(square1);
     Mesh* tank = hw_object2D::CreateTank("tank", glm::vec3(0.5, 1, 0.1), true);
@@ -135,6 +127,8 @@ void TankWars::Init()
     AddMeshToList(projectile);
     Mesh* trajectoryUnit = hw_object2D::CreateTrajectory("trajectory", glm::vec3(1, 1, 1), true);
     AddMeshToList(trajectoryUnit);
+    Mesh* trajectoryUnitLine = hw_object2D::CreateTrajectoryLine("trajectoryLine", glm::vec3(1, 1, 1), true);
+    AddMeshToList(trajectoryUnitLine);
    
 }
 
@@ -176,29 +170,31 @@ void TankWars::PlaceTanks(float deltaTime) {
         modelMatrix *= transform2D::Rotate(tank_angle);
         RenderMesh2D(meshes["tank"], shaders["VertexColor"], modelMatrix);
         modelMatrix *= transform2D::Translate(0, 25);
-        modelMatrix *= transform2D::Rotate(t_angle);
+        modelMatrix *= transform2D::Rotate(t_angle - tank_angle);
         RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
         modelMatrix *= transform2D::Translate(25, 0);
         coordinates = modelMatrix;
         // trajectory
         float coordX = coordinates[2][0];
         float coordY = coordinates[2][1];
-        float speedX = cos(t_angle + tank_angle) * magnitude;
-        float speedY = sin(t_angle + tank_angle) * magnitude;
-        float timeStep = 0.2f;  // small time step for trajectory calculation
-
-        // Render trajectory points
+        float speedX = cos(t_angle) * magnitude;
+        float speedY = sin(t_angle) * magnitude;
+        float timeStep = 0.2f;
         for (int i = 0; i < 200; ++i) {
             if (i > 0) {
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(coordX, coordY);
-                RenderMesh2D(meshes["trajectory"], shaders["VertexColor"], modelMatrix);
+                if (trajectory_1) {
+                    modelMatrix *= transform2D::Rotate(atan2(speedY, speedX) + M_PI / 2);
+                    RenderMesh2D(meshes["trajectoryLine"], shaders["VertexColor"], modelMatrix);
+                }
+                else {
+                    RenderMesh2D(meshes["trajectory"], shaders["VertexColor"], modelMatrix);
+                }
             }
-
-            // Update coordinates based on speed and gravity
             coordX += speedX * timeStep;
             coordY += speedY * timeStep;
-            speedY -= g * timeStep;  // Apply gravity effect on the y-axis speed
+            speedY -= g * timeStep;
         }
     }
             for (size_t i = 0; i < projectileCoordinates.size(); ++i) {
@@ -206,7 +202,7 @@ void TankWars::PlaceTanks(float deltaTime) {
                 projectileSpeed[i].y -= g * deltaTime * speed;
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(projectileCoordinates[i].x,projectileCoordinates[i].y);
-                modelMatrix *= transform2D::Rotate(tank_angle);
+                modelMatrix *= transform2D::Rotate(t_angle);
                 RenderMesh2D(meshes["projectile"], shaders["VertexColor"], modelMatrix);
                 if (projectileCoordinates[i].y < 0 || projectileCoordinates[i].x > window->GetResolution().x) {
                     projectileCoordinates.erase(projectileCoordinates.begin() + i);
@@ -234,14 +230,14 @@ void TankWars::PlaceTanks(float deltaTime) {
             RenderMesh2D(meshes["enemy"], shaders["VertexColor"], modelMatrix);
             modelMatrix *= transform2D::Translate(0, 25);
             //t_enemy_angle += M_PI;
-            modelMatrix *= transform2D::Rotate(t_enemy_angle);
+            modelMatrix *= transform2D::Rotate(t_enemy_angle - enemy_angle);
             RenderMesh2D(meshes["turret"], shaders["VertexColor"], modelMatrix);
             modelMatrix *= transform2D::Translate(25, 0);
             enemy_coordinates = modelMatrix;
             float coordX = enemy_coordinates[2][0];
             float coordY = enemy_coordinates[2][1];
-            float speedX = cos(t_enemy_angle + enemy_angle) * magnitude;
-            float speedY = sin(t_enemy_angle + enemy_angle) * magnitude;
+            float speedX = cos(t_enemy_angle) * magnitude;
+            float speedY = sin(t_enemy_angle) * magnitude;
             float timeStep = 0.2f;  // small time step for trajectory calculation
 
             // Render trajectory points
@@ -249,7 +245,13 @@ void TankWars::PlaceTanks(float deltaTime) {
                 if (i > 0) {
                     modelMatrix = glm::mat3(1);
                     modelMatrix *= transform2D::Translate(coordX, coordY);
-                    RenderMesh2D(meshes["trajectory"], shaders["VertexColor"], modelMatrix);
+                    if (trajectory_2) {
+                        modelMatrix *= transform2D::Rotate(atan2(speedY, speedX) + M_PI / 2);
+                        RenderMesh2D(meshes["trajectoryLine"], shaders["VertexColor"], modelMatrix);
+                    }
+                    else {
+                        RenderMesh2D(meshes["trajectory"], shaders["VertexColor"], modelMatrix);
+                    }
                 }
                 coordX += speedX * timeStep;
                 coordY += speedY * timeStep;
@@ -263,7 +265,7 @@ void TankWars::PlaceTanks(float deltaTime) {
                 e_projectileSpeed[i].y -= g * deltaTime * speed;
                 modelMatrix = glm::mat3(1);
                 modelMatrix *= transform2D::Translate(e_projectileCoordinates[i].x, e_projectileCoordinates[i].y);
-                modelMatrix *= transform2D::Rotate(enemy_angle);
+                modelMatrix *= transform2D::Rotate(t_enemy_angle);
                 RenderMesh2D(meshes["projectile"], shaders["VertexColor"], modelMatrix);
                 if (e_projectileCoordinates[i].y < 0 || e_projectileCoordinates[i].x > 1280 || e_projectileCoordinates[i].x < 0) {
                     e_projectileCoordinates.erase(e_projectileCoordinates.begin() + i);
@@ -351,7 +353,7 @@ void TankWars::Hit() {
     }
 }
 
-void TankWars::HitFloor()
+void TankWars::HeroHitFloor()
 {
     for (int j = 0; j < projectileCoordinates.size(); j++) {
         float proj_x = projectileCoordinates[j].x;
@@ -362,14 +364,38 @@ void TankWars::HitFloor()
             float height = peaks[x1] * (1 - t) + peaks[x1 + 1] * t;
             if (height + elevation >= proj_y) {
                 int y1 = static_cast<int>(proj_y);
-                for (int i = -impact; i < impact; i++)
-                    peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
+                for (int i = -impact; i < impact; i++) {
+                    int tank_pos = static_cast<int>(tank_x);
+                    int enemy_pos = static_cast<int>(enemy_x);
+                    if (x1 - i >= 0 && x1 - i < 1280) {
+                        peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
+                        if (peaks[x1 - i] < -elevation)
+                            peaks[x1 - i] = -elevation;
+                        if (x1 - i == tank_pos) {
+                            tank_y -= impact * cos(i * M_PI / (2 * impact));
+                            if (tank_y < -elevation)
+                                tank_y = -elevation;
+                            //tank_angle = atan2(peaks[tank_x + 1] - peaks[tank_x] - impact * cos((i  + 1)* M_PI / (2 * impact)), 1);
+                        }
+                        if (x1 - i == enemy_pos) {
+                            enemy_y -= impact * cos(i * M_PI / (2 * impact));
+                            if (enemy_y < -elevation)
+                                enemy_y = -elevation;
+                            //enemy_angle = atan2(peaks[enemy_x + 1] - peaks[enemy_x] - impact * cos((i + 1) * M_PI / (2 * impact)), 1);
+                        }
+                    }
+
+                }
                 projectileCoordinates.erase(projectileCoordinates.begin() + j);
                 projectileSpeed.erase(projectileSpeed.begin() + j);
                 --j;
             }
         }
     }
+}
+
+void TankWars::VillainHitFloor()
+{
     for (int j = 0; j < e_projectileCoordinates.size(); j++) {
         float proj_x = e_projectileCoordinates[j].x;
         float proj_y = e_projectileCoordinates[j].y;
@@ -379,8 +405,29 @@ void TankWars::HitFloor()
             float height = peaks[x1] * (1 - t) + peaks[x1 + 1] * t;
             if (height + elevation >= proj_y) {
                 int y1 = static_cast<int>(proj_y);
-                for (int i = -impact; i < impact; i++)
-                    peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
+                for (int i = -impact; i < impact; i++) {
+                    int tank_pos = static_cast<int>(tank_x);
+                    int enemy_pos = static_cast<int>(enemy_x);
+                    if (x1 - i >= 0 && x1 - i < 1280) {
+                        peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
+                        if (peaks[x1 - i] < -elevation)
+                            peaks[x1 - i] = -elevation;
+                        if (x1 - i == tank_pos) {
+                            tank_y -= impact * cos(i * M_PI / (2 * impact));
+                            if (tank_y < -elevation)
+                                tank_y = -elevation;
+                            //tank_angle = atan2(peaks[tank_x + 1] - peaks[tank_x] - impact * cos((i + 1) * M_PI / (2 * impact)), 1);
+                        }
+                        if (x1 - i == enemy_pos) {
+                            enemy_y -= impact * cos(i * M_PI / (2 * impact));
+                            if (enemy_y < -elevation)
+                                enemy_y = -elevation;
+                            //enemy_angle = atan2(peaks[enemy_x + 1] - peaks[enemy_x] - impact * cos((i + 1) * M_PI / (2 * impact)), 1);
+                        }
+                    }
+                    /*tank_angle = atan2(peaks[tank_pos + 1] - peaks[tank_pos] , 1);
+                    enemy_angle = atan2(peaks[enemy_pos + 1] - peaks[enemy_pos], 1);*/
+                }
                 e_projectileCoordinates.erase(e_projectileCoordinates.begin() + j);
                 e_projectileSpeed.erase(e_projectileSpeed.begin() + j);
                 --j;
@@ -389,17 +436,36 @@ void TankWars::HitFloor()
     }
 }
 
+void TankWars::HitFloor()
+{
+    HeroHitFloor();
+    VillainHitFloor();
+}
+
 void TankWars::LandSlide(float deltaTimeSeconds)
 {
-
+    for (int i = 0; i < peaks.size() - 1; i++) {
+        if (abs(peaks[i] - peaks[i + 1] > threshold)) {
+            cout << "Landsliding" << "\n";
+            if (peaks[i] > peaks[i + 1]) {
+                peaks[i] -= deltaTimeSeconds * 1;
+                peaks[i + 1] += deltaTimeSeconds * 1;
+            }
+            else {
+                peaks[i] += deltaTimeSeconds * 1;
+                peaks[i + 1] -= deltaTimeSeconds * 1;
+            }
+        }
+    }
 }
+
 
 
 void TankWars::Update(float deltaTimeSeconds)
 {
 
-    CreateField();
     PlaceTanks(deltaTimeSeconds);
+    CreateField();
     Hit();
     HitFloor();
     LandSlide(deltaTimeSeconds);
@@ -486,17 +552,23 @@ void TankWars::OnKeyPress(int key, int mods)
 {
 
     if (key == GLFW_KEY_SPACE && p1_alive) {
-        projectileCoordinates.push_back(glm::vec2(coordinates[2][0] + cos(t_angle  + tank_angle), coordinates[2][1] + sin(t_angle + tank_angle)));
-        projectileSpeed.push_back(glm::vec2(cos(t_angle + tank_angle) * magnitude, sin(t_angle + tank_angle) * magnitude));
+        projectileCoordinates.push_back(glm::vec2(coordinates[2][0] + cos(t_angle), coordinates[2][1] + sin(t_angle)));
+        projectileSpeed.push_back(glm::vec2(cos(t_angle) * magnitude, sin(t_angle) * magnitude));
         launch_p1 = true;
     }
 
     if (key == GLFW_KEY_ENTER && p2_alive) {
-        e_projectileCoordinates.push_back(glm::vec2(enemy_coordinates[2][0] + cos(enemy_angle + t_enemy_angle), enemy_coordinates[2][1] + sin(enemy_angle + t_enemy_angle)));
-        e_projectileSpeed.push_back(glm::vec2(cos(enemy_angle + t_enemy_angle) * magnitude, sin(enemy_angle + t_enemy_angle) * magnitude));
+        e_projectileCoordinates.push_back(glm::vec2(enemy_coordinates[2][0] + cos( t_enemy_angle), enemy_coordinates[2][1] + sin(t_enemy_angle)));
+        e_projectileSpeed.push_back(glm::vec2(cos(t_enemy_angle) * magnitude, sin(t_enemy_angle) * magnitude));
         launch_p2 = true;
     }
     // Add key press event
+    if (key == GLFW_KEY_F1) {
+        trajectory_1 = !trajectory_1;
+    }
+    if (key == GLFW_KEY_F2) {
+        trajectory_2 = !trajectory_2;
+    }
 }
 
 

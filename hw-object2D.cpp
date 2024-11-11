@@ -255,3 +255,32 @@ Mesh* hw_object2D::CreateTrajectory(
 }
 
 
+Mesh* hw_object2D::CreateTrajectoryLine(
+    const std::string& name,
+    glm::vec3 color,
+    bool fill)
+{
+    std::vector<VertexFormat> vertices = {
+        VertexFormat(glm::vec3(-1, 0, 0), color),  //0
+        VertexFormat(glm::vec3(1, 8, 0), color),   //1
+        VertexFormat(glm::vec3(-1, 8, 0), color),  //2
+        VertexFormat(glm::vec3(1, 0, 0), color), //3
+    };
+    Mesh* projectile = new Mesh(name);
+    std::vector<unsigned int> indices = {
+        0, 2, 1,
+        0, 3, 2
+    };
+
+    if (!fill) {
+        projectile->SetDrawMode(GL_LINE_LOOP);
+    }
+
+    else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+    projectile->InitFromData(vertices, indices);
+    return projectile;
+}
