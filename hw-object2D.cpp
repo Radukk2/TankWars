@@ -192,8 +192,43 @@ Mesh* hw_object2D::CreateProjectile(
     std::vector<VertexFormat> vertices;
     vertices.push_back((glm::vec3(0, 0, 0), color));
     for (int i = 0; i < 200; i++) {
+        float angle = i * 6 * M_PI / 200;
+        vertices.push_back(VertexFormat(glm::vec3(6 * cos(angle), 6 * sin(angle), 0), color));
+    }
+    Mesh* projectile = new Mesh(name);
+    std::vector<unsigned int> indices;
+
+    for (int i = 1; i < 200; i++) {
+        indices.push_back(i);
+        indices.push_back(0);
+        indices.push_back(i + 1);
+    }
+    indices.push_back(200);
+    indices.push_back(0);
+    indices.push_back(1);
+    if (!fill) {
+        projectile->SetDrawMode(GL_LINE_LOOP);
+    }
+
+    else {
+        // Draw 2 triangles. Add the remaining 2 indices
+        indices.push_back(0);
+        indices.push_back(2);
+    }
+    projectile->InitFromData(vertices, indices);
+    return projectile;
+}
+
+Mesh* hw_object2D::CreateTrajectory(
+    const std::string& name,
+    glm::vec3 color,
+    bool fill)
+{
+    std::vector<VertexFormat> vertices;
+    vertices.push_back((glm::vec3(0, 0, 0), color));
+    for (int i = 0; i < 200; i++) {
         float angle = i * 2 * M_PI / 200;
-        vertices.push_back(VertexFormat(glm::vec3(3 * cos(angle), 3 * sin(angle), 0), color));
+        vertices.push_back(VertexFormat(glm::vec3(2 * cos(angle), 2 * sin(angle), 0), color));
     }
     Mesh* projectile = new Mesh(name);
     std::vector<unsigned int> indices;

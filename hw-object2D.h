@@ -16,4 +16,5 @@ namespace hw_object2D
     Mesh* CreateLifeBar(const std::string& name, glm::vec3 color, bool fill);
     Mesh* CreateLife(const std::string& name, glm::vec3 color, bool fill);
     Mesh* CreateProjectile(const std::string& name, glm::vec3 color, bool fill);
+    Mesh* CreateTrajectory(const std::string& name, glm::vec3 color, bool fill);
 }
