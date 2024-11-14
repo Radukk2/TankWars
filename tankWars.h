@@ -17,7 +17,6 @@ namespace m1
     private:
         void FrameStart() override;
         void Update(float deltaTimeSeconds) override;
-
         void FrameEnd() override;
         void CreateField();
         void PlaceTanks(float deltaTime);

@@ -143,6 +143,7 @@ void TankWars::FrameStart()
     glm::ivec2 resolution = window->GetResolution();
     // Sets the screen area where to draw
     glViewport(0, 0, resolution.x, resolution.y);
+    //cout << resolution.x << " " << resolution.y << " \n";
 }
 
 void TankWars::CreateField() {
@@ -164,7 +165,6 @@ void TankWars::CreateField() {
 
 void TankWars::PlaceTanks(float deltaTime) {
     float speed = 6;
-    //place my_tank
     if (p1_alive) {
         modelMatrix = glm::mat3(1);
         modelMatrix *= transform2D::Translate(tank_x, tank_y + elevation);
@@ -264,7 +264,7 @@ void TankWars::PlaceTanks(float deltaTime) {
                 modelMatrix *= transform2D::Translate(e_projectileCoordinates[i].x, e_projectileCoordinates[i].y);
                 modelMatrix *= transform2D::Rotate(t_enemy_angle);
                 RenderMesh2D(meshes["projectile"], shaders["VertexColor"], modelMatrix);
-                if (e_projectileCoordinates[i].y < 0 || e_projectileCoordinates[i].x > 1280 || e_projectileCoordinates[i].x < 0) {
+                if (e_projectileCoordinates[i].y < 0 || e_projectileCoordinates[i].x > window->GetResolution().x || e_projectileCoordinates[i].x < 0) {
                     e_projectileCoordinates.erase(e_projectileCoordinates.begin() + i);
                     e_projectileSpeed.erase(e_projectileSpeed.begin() + i);
                     --i;
@@ -364,7 +364,7 @@ void TankWars::HeroHitFloor()
                 for (int i = -impact; i < impact; i++) {
                     int tank_pos = static_cast<int>(tank_x);
                     int enemy_pos = static_cast<int>(enemy_x);
-                    if (x1 - i >= 0 && x1 - i < 1280) {
+                    if (x1 - i >= 0 && x1 - i < window->GetResolution().x) {
                         peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
                         if (peaks[x1 - i] < -elevation)
                             peaks[x1 - i] = -elevation;
@@ -406,7 +406,7 @@ void TankWars::VillainHitFloor()
                 for (int i = -impact; i < impact; i++) {
                     int tank_pos = static_cast<int>(tank_x);
                     int enemy_pos = static_cast<int>(enemy_x);
-                    if (x1 - i >= 0 && x1 - i < 1280) {
+                    if (x1 - i >= 0 && x1 - i < window->GetResolution().x) {
                         peaks[x1 - i] -= impact * cos(i * M_PI / (2 * impact));
                         if (peaks[x1 - i] < -elevation)
                             peaks[x1 - i] = -elevation;
@@ -423,8 +423,6 @@ void TankWars::VillainHitFloor()
                             //enemy_angle = atan2(peaks[enemy_x + 1] - peaks[enemy_x] - impact * cos((i + 1) * M_PI / (2 * impact)), 1);
                         }
                     }
-                    /*tank_angle = atan2(peaks[tank_pos + 1] - peaks[tank_pos] , 1);
-                    enemy_angle = atan2(peaks[enemy_pos + 1] - peaks[enemy_pos], 1);*/
                 }
                 e_projectileCoordinates.erase(e_projectileCoordinates.begin() + j);
                 e_projectileSpeed.erase(e_projectileSpeed.begin() + j);
@@ -445,9 +443,9 @@ void TankWars::HitFloor()
 
 void TankWars::LandSlide(float deltaTimeSeconds)
 {
-    for (int i = 0; i < peaks.size() - 1; i++) {
-        if (abs(peaks[i] - peaks[i + 1]) > threshold) {
-            float erosionAmount = epsilon * abs(peaks[i] - peaks[i + 1]);
+    for (int i = 1; i < peaks.size() - 1; i++) {
+        //if (abs(peaks[i] - peaks[i + 1]) > threshold) {
+            /*float erosionAmount = epsilon * abs(peaks[i] - peaks[i + 1]);
             if (peaks[i] > peaks[i + 1]) {
                 peaks[i] -= erosionAmount * deltaTimeSeconds;
                 peaks[i + 1] += erosionAmount * deltaTimeSeconds;
@@ -455,8 +453,24 @@ void TankWars::LandSlide(float deltaTimeSeconds)
             else {
                 peaks[i] += erosionAmount * deltaTimeSeconds;
                 peaks[i + 1] -= erosionAmount * deltaTimeSeconds;
-            }
+            }*/
+        if (i == static_cast<int>(tank_x)) {
+            tank_y = (peaks[i - 1] + peaks[i + 1]) / 2;
+            float V_x = 1;
+            float V_y = peaks[tank_x + 1] - peaks[tank_x];
+            tank_angle = atan2(V_y, V_x);
+
         }
+        if (i == static_cast<int>(enemy_x) && peaks[i] == enemy_y) {
+            enemy_y = (peaks[i - 1] + peaks[i + 1]) / 2;
+            float V_x = 1;
+            float V_y = peaks[enemy_x + 1] - peaks[enemy_x];
+            enemy_angle = atan2(V_y, V_x);
+
+        }
+
+        peaks[i] = (peaks[i - 1] + peaks[i + 1]) / 2;
+        //}
     }
 }
 
@@ -500,7 +514,7 @@ void TankWars::OnInputUpdate(float deltaTime, int mods)
         }
     }
     if (window->KeyHold(GLFW_KEY_D)) {
-        if (tank_x < 1240) {
+        if (tank_x < window->GetResolution().x - 40)  {
             tank_x += deltaTime * tank_speed;
             tank_y = peaks[tank_x] + (tank_x - tank_x) * (peaks[tank_x + 1] - peaks[tank_x]);
             float V_x = 1;
@@ -518,7 +532,7 @@ void TankWars::OnInputUpdate(float deltaTime, int mods)
         }
     }
     if (window->KeyHold(GLFW_KEY_RIGHT)) {
-        if (enemy_x < 1240) {
+        if (enemy_x < window->GetResolution().x - 40) {
             enemy_x += deltaTime * tank_speed;
             enemy_y = peaks[enemy_x] + (enemy_x - enemy_x) * (peaks[enemy_x + 1] - peaks[enemy_x]);
             float V_x = 1;
