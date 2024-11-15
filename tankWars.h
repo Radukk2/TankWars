@@ -20,6 +20,8 @@ namespace m1
         void FrameEnd() override;
         void CreateField();
         void PlaceTanks(float deltaTime);
+        void PlaceHero(float deltaTime, float speed);
+        void PlaceEnemy(float deltaTime, float speed);
         void EnemyHit();
         void HeroHit();
         void Hit();
@@ -27,6 +29,7 @@ namespace m1
         void HeroHitFloor();
         void VillainHitFloor();
         void LandSlide(float deltaTimeSeconds);
+        void UpdateCameraForResolution(const glm::ivec2& resolution);
         void OnInputUpdate(float deltaTime, int mods) override;
         void OnKeyPress(int key, int mods) override;
         void OnKeyRelease(int key, int mods) override;
@@ -53,8 +56,6 @@ namespace m1
         float enemy_y;
         float elevation;
         float tank_angle, enemy_angle, t_angle, t_enemy_angle;
-        float t_position_x, t_position_y;
-        float t_enemy_position_x, t_enemy_position_y;
         bool p1_alive, p2_alive, launch_p1, launch_p2;
         int num_hits_1, num_hits_2;
         std::vector<glm::vec2> projectileSpeed, projectileCoordinates;

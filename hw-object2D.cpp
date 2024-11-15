@@ -46,20 +46,21 @@ Mesh* hw_object2D::CreateTank(
 {
     std::vector<VertexFormat> vertices =
     {
-        VertexFormat(glm::vec3(-45, 10, 0), color), //0
-        VertexFormat(glm::vec3(-40, 20, 0), color), //1
-        VertexFormat(glm::vec3(40, 20, 0), color),  //2
-        VertexFormat(glm::vec3(45, 10, 0), color),  //3
-        VertexFormat(glm::vec3(40, 10, 0), color),  //4
-        VertexFormat(glm::vec3(20, 0, 0), color),   //5
-        VertexFormat(glm::vec3(-20, 0, 0), color),  //6
-        VertexFormat(glm::vec3(-40, 10, 0), color), //7
-        VertexFormat(glm::vec3(0, 20, 0), color)    //8
+        VertexFormat(glm::vec3(-35, 10, 0), color), //0
+        VertexFormat(glm::vec3(-30, 20, 0), color), //1
+        VertexFormat(glm::vec3(30, 20, 0), color),  //2
+        VertexFormat(glm::vec3(35, 10, 0), color),  //3
+        VertexFormat(glm::vec3(30, 10, 0), glm::vec3(0.2,0.2,0.2)),  //4
+        VertexFormat(glm::vec3(15, 0, 0), glm::vec3(0.2,0.2,0.2)),   //5
+        VertexFormat(glm::vec3(-15, 0, 0), glm::vec3(0.2,0.2,0.2)),  //6
+        VertexFormat(glm::vec3(-30, 10, 0), glm::vec3(0.2,0.2,0.2)), //7
+        VertexFormat(glm::vec3(0, 20, 0),color)    //8
     };
 
-    for (int i = 0; i < 210; i++) {
-        vertices.push_back(VertexFormat(glm::vec3(15 * cos(i * M_PI / 200), 15 * sin(i * M_PI / 200) + 20, 0), color));
+    for (int i = 0; i <= 180; i++) {
+        vertices.push_back(VertexFormat(glm::vec3(15 * cos(glm::radians(static_cast<float>(i))), 15 * sin(glm::radians(static_cast<float>(i))) + 20, 0), color));
     }
+
     Mesh* tank = new Mesh(name);
 
     std::vector<unsigned int> indices = { 0, 3, 1,
